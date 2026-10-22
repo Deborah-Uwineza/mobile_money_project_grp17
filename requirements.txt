@@ -1,0 +1,4 @@
+numpy
+psycopg[binary]
+neo4j
+matplotlib

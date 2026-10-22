@@ -1,0 +1,14 @@
+# Local data and database stores (must stay local)
+data/
+import_tmp/
+*.csv.bak
+*.dump
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Secrets
+.env
+*.secret
+# Large raw logs if you do not want them on GitHub
+results/*.log
