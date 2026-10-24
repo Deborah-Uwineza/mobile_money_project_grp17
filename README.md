@@ -49,6 +49,7 @@ python -m pip install --default-timeout=200 --retries 10 matplotlib
 ```
 `numpy` is the only package `capture.py` needs. Install the others one at a time if your connection is slow.
 
+<<<<<<< HEAD
 ### Phase 1: Capture (no database needed)
 
 ```bat
@@ -149,3 +150,41 @@ Then stop both database services and screenshot the stopped status.
 * If `dbms.components()` or `SHOW SETTINGS` is not allowed, read the memory settings from `conf/neo4j.conf`.
 * Neo4j Q4 at depth 10 and Q2 can time out. That is a valid result: record it.
 
+=======
+## Run order
+
+Run everything from the project root. Take screenshots (terminal, taskbar and clock visible) at each step.
+
+| # | Command | Handout section |
+|---|---|---|
+| 1 | `python verify_generator.py` | 1, 9.2 |
+| 2 | Create DBs: `psql -U postgres -c "CREATE DATABASE mobile_money"`; install and start Neo4j Community (default `neo4j` database) | 1.1 |
+| 3 | `python record_environment.py` (also screenshot `SHOW timezone;` in psql) | 1.1 |
+| 4 | `python capture.py` (about 2 to 5 minutes; creates `data/*.csv` and `results/capture_audit.json`) | 1.2 |
+| 5 | `psql -U postgres -d mobile_money -f sql/01_schema.sql` | 2.1 |
+| 6 | `psql -U postgres -d mobile_money -f sql/02_load.sql` (note the `\timing` totals = loading seconds) | 2.2 |
+| 7 | `psql -U postgres -d mobile_money -f sql/03_constraints_indexes.sql` (total = index/constraint seconds) | 2.2 |
+| 8 | `psql -U postgres -d mobile_money -f sql/04_checks.sql` then `python verify_postgres.py` | 2.2 |
+| 9 | `python prepare_import.py` | 3.2 |
+| 10 | Stop Neo4j (`neo4j stop` or the service), then `neo4j\import_full.bat`, then start Neo4j | 3.2 |
+| 11 | `python setup_neo4j.py` (constraints, range index, wait until ONLINE) | 3.2 |
+| 12 | `python verify_neo4j.py`, then `python prepare_import.py --cleanup` | 3.2 |
+| 13 | `python inspect_account.py 998` | 3.3 |
+| 14 | `python compare.py` (all 61 cases; start with `--only Q1 Q3` to debug) | 4, 5, 6.1 |
+| 15 | `python independent_checks.py overlap B --compare`, `chain B --compare`, `cycle B --compare` | 6.1 |
+| 16 | `python benchmark.py` then `python explain_plans.py` (Q2, Q4 B depth 10, Q7 B bound 6) | 6.2 |
+| 17 | `python benchmark.py --q7-version v2`, `python compare.py --only Q7 --q7-version v2`, `python explain_plans.py --q7-version v2` | 6.3 |
+| 18 | `python loadtest.py --q7-version v1` (or `v2`, whichever you select) | 7.1 |
+| 19 | `python make_charts.py` | 5.1, 7.2 |
+| 20 | Finally: `python verify_generator.py`, rerun `python compare.py`, stop both DB services, screenshot the stopped status | 9.2 |
+
+Notes:
+* Start the slow jobs first: capture (step 4) and the PostgreSQL load (step 6) can run while you read the queries.
+* Do not run benchmarks while another heavy job is running, and keep one database service active at a time for timing (Section 6.2). Stop the other service before `benchmark.py --engine pg` or `--engine neo`.
+* `benchmark.py` can take hours if Cypher Q4 depth 10 or Q2 time out. Use `--only` and `--engine` to run pieces. Timeouts are recorded as such, never as timings.
+* Cypher cannot take a path bound as a parameter, so `queries.py` inserts the validated integer into the text.
+* The import scripts use the Neo4j 5 syntax (`neo4j-admin database import full`). Older 4.x versions use a different command.
+* If Neo4j reports that `dbms.components()` or `SHOW SETTINGS` is not allowed, read the memory settings from `conf/neo4j.conf`.
+
+
+>>>>>>> ca839aa20e167c0f23b2971ae87f8d276f3550fd
