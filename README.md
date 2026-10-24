@@ -79,14 +79,4 @@ Notes:
 * The import scripts use the Neo4j 5 syntax (`neo4j-admin database import full`). Older 4.x versions use a different command.
 * If Neo4j reports that `dbms.components()` or `SHOW SETTINGS` is not allowed, read the memory settings from `conf/neo4j.conf`.
 
-## Submit
 
-```bat
-python make_submission_zip.py      :: creates ..\mobile_money_submission.zip (no CSVs, no database stores)
-git init
-git add .
-git commit -m "Project 2: mobile money investigations"
-git remote add origin https://github.com/Deborah-Uwineza/<repository-name>.git
-git push -u origin main
-```
-`data/` and `import_tmp/` are git-ignored. Keep `results/` (raw timings, comparison outputs, plans) in the submission.
